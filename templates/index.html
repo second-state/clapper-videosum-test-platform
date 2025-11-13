@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* 基本布局与美化 */
+        :root {
+            --bg: #f6f9fc;
+            --card: #ffffff;
+            --accent: #2563eb;
+            --muted: #6b7280;
+            --border: #e6e9ef;
+            --danger: #ef4444;
+        }
+
+        a {
+            display: inline-block;
+            width: 300px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, var(--bg), #ffffff);
+            color: #111827;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 90%;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+        }
+
+        .card h2 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn.secondary {
+            background: #fff;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.03), transparent);
+        }
+
+        .dropzone.dragover {
+            border-color: var(--accent);
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0.02));
+        }
+
+        .providers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .provider {
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            background: #fafafb;
+            position: relative;
+        }
+
+        .provider .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .remove-btn {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        pre#result {
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 300px;
+            overflow: auto;
+            padding: 12px;
+            background: #0f1724;
+            color: #e6eef8;
+            border-radius: 8px;
+        }
+
+        /* 新增 combobox 样式 */
+        .combobox {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .combobox .model-input {
+            flex: 1;
+            border: 0;
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .combobox .combo-toggle {
+            appearance: none;
+            background: transparent;
+            border: 0;
+            padding: 0 10px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .combobox .combo-list {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            margin-top: 6px;
+            max-height: 220px;
+            overflow: auto;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+            z-index: 40;
+            list-style: none;
+            padding: 6px 4px;
+            box-sizing: border-box;
+        }
+
+        .combobox .combo-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #0f1724;
+        }
+
+        .combobox .combo-item[aria-selected="true"],
+        .combobox .combo-item:hover {
+            background: rgba(37, 99, 235, 0.06);
+            color: var(--accent);
+        }
+
+        /* 表格与缩略图样式（新增） */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .results-table th, .results-table td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            vertical-align: top;
+            text-align: left;
+            background: #fff;
+        }
+
+        .results-table th {
+            background: linear-gradient(180deg, #f8fafc, #fff);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .thumbs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .thumbs img {
+            width: 80px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e6e9ef;
+        }
+
+        .summary-cell {
+            max-width: 380px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .thumbs img {
+                width: 64px;
+                height: 46px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>{{ .title }}</h1>
+        <div class="small">只需提供视频链接（或上传 CSV）和提示词，并可添加多个 API 提供者对比模型</div>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h2>输入</h2>
+
+            <label for="video_url">视频链接（多个请用 ; 分隔，或上传 CSV）</label>
+            <input type="text" id="video_url" name="video_url" placeholder="https://...;https://..."/>
+
+            <div style="height:12px"></div>
+
+            <label>上传 CSV（点击或拖拽，查找列名 video_url）</label>
+            <div id="dropzone" class="dropzone" tabindex="0">
+                点击上传或拖拽 CSV 到此处
+                <div class="muted">CSV 中包含 video_url 列时会自动填充视频链接（用 ; 分隔）</div>
+                <input id="fileInput" type="file" accept=".csv,text/csv" style="display:none"/>
+            </div>
+
+            <div style="height:16px"></div>
+
+            <label for="prompt">提示词（Prompt）</label>
+            <textarea id="prompt" name="prompt" placeholder="请输入需要用于模型的提示词"></textarea>
+
+            <div style="height:12px"></div>
+
+            <div class="row" style="justify-content:space-between; align-items:center;">
+                <button id="startBtn" class="btn" type="button">开始测试</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content: space-between;   align-items: center;">
+                <h2>API 提供者</h2>
+                <button style="margin-bottom: 12px;" id="addProviderBtn" class="btn secondary" type="button">+ 添加 API
+                    提供者
+                </button>
+            </div>
+            <div class="providers" id="providersContainer">
+                <!-- provider items 动态插入 -->
+            </div>
+            <div style="height:8px"></div>
+            <div class="muted">每个提供者填写 API URL 和 API Key，然后点击 “获取模型” 来加载下拉列表。</div>
+        </div>
+    </div>
+
+
+    <div style="height:18px"></div>
+
+    <div class="card">
+        <h2>结果</h2>
+        <!-- 将结果由 pre 替换为可渲染的容器 -->
+        <div id="result" class="small">无结果</div>
+        <div id="resultsTable" style="margin-top:12px; overflow:auto;"></div>
+    </div>
+</div>
+
+<script>
+    // CSV 读取与解析（简单实现）
+    const dropzone = document.getElementById('dropzone')
+    const fileInput = document.getElementById('fileInput')
+    const videoInput = document.getElementById('video_url')
+    const providersContainer = document.getElementById('providersContainer')
+    const addProviderBtn = document.getElementById('addProviderBtn')
+    const startBtn = document.getElementById('startBtn')
+    const resultEl = document.getElementById('result')
+    const resultsTable = document.getElementById('resultsTable')
+
+    // 拖拽交互
+    dropzone.addEventListener('click', () => fileInput.click())
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover')
+    })
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'))
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover')
+        const f = e.dataTransfer.files?.[0];
+        if (f) handleFile(f)
+    })
+    fileInput.addEventListener('change', (e) => {
+        const f = e.target.files?.[0];
+        if (f) handleFile(f)
+        fileInput.value = ''
+    })
+
+    function handleFile(file) {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            alert('请上传 CSV 文件')
+            return
+        }
+        const reader = new FileReader()
+        reader.onload = () => {
+            try {
+                const text = reader.result
+                parseCSV(text)
+            } catch (err) {
+                alert('读取 CSV 出错')
+            }
+        }
+        reader.readAsText(file)
+    }
+
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0)
+        if (lines.length === 0) {
+            alert('CSV 为空');
+            return
+        }
+        const sep = detectSeparator(lines[0])
+        const headers = splitLine(lines[0], sep).map(h => h.trim())
+        const videoIdx = headers.findIndex(h => h.toLowerCase() === 'video_url')
+        if (videoIdx === -1) {
+            alert('CSV 中未找到 video_url 列')
+            return
+        }
+        const values = []
+        for (let i = 1; i < lines.length; i++) {
+            const cols = splitLine(lines[i], sep)
+            if (cols.length > videoIdx) {
+                const v = cols[videoIdx].trim()
+                if (v) values.push(v)
+            }
+        }
+        if (values.length === 0) {
+            alert('在 CSV 中未找到任何 video_url 值')
+            return
+        }
+        videoInput.value = values.join(';')
+        resultEl.textContent = `从 CSV 导入 ${values.length} 个 video_url`
+    }
+
+    function detectSeparator(line) {
+        if (line.indexOf(',') !== -1) return ','
+        if (line.indexOf('\t') !== -1) return '\t'
+        if (line.indexOf(';') !== -1) return ';'
+        return ','
+    }
+
+    function splitLine(line, sep) {
+        // 简单 split，未处理引号内包含分隔符的复杂情况
+        return line.split(sep)
+    }
+
+    // Providers 管理
+    let providerIdSeed = 1
+
+    function createProviderCard(initial = {}) {
+        const id = providerIdSeed++
+        const el = document.createElement('div')
+        el.className = 'provider'
+        el.dataset.id = id
+        el.innerHTML = `
+            <button class="remove-btn" title="删除">✕</button>
+            <label>API URL</label>
+            <input type="text" class="api-url" placeholder="https://api.example.com" value="${escapeHtml(initial.api_url || '')}" />
+            <label style="margin-top:8px;">API Key</label>
+            <input type="text" class="api-key" placeholder="API Key" value="${escapeHtml(initial.api_key || '')}" />
+            <div class="row" style="margin-top:10px;">
+                <button class="btn fetch-btn" type="button">获取模型</button>
+                <div style="flex:1;position: relative;">
+                    <div class="combobox" tabindex="0">
+                        <input type="text" class="model-input" placeholder="- 请选择模型 -" value="${escapeHtml(initial.model || '')}" />
+                        <button type="button" class="combo-toggle" aria-label="toggle">▾</button>
+                        <ul class="combo-list" role="listbox" hidden></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="actions small"></div>
+        `
+        // 事件
+        const removeBtn = el.querySelector('.remove-btn')
+        const fetchBtn = el.querySelector('.fetch-btn')
+        const apiUrlInput = el.querySelector('.api-url')
+        const apiKeyInput = el.querySelector('.api-key')
+        const combobox = el.querySelector('.combobox')
+        const input = el.querySelector('.model-input')
+        const listEl = el.querySelector('.combo-list')
+        const actions = el.querySelector('.actions')
+
+        // 初始化 combobox 事件
+        setupCombobox(combobox)
+
+        removeBtn.addEventListener('click', () => {
+            el.remove()
+        })
+        fetchBtn.addEventListener('click', async () => {
+            actions.textContent = '加载中...'
+            const apiUrl = apiUrlInput.value.trim()
+            const apiKey = apiKeyInput.value.trim()
+            if (!apiUrl) {
+                actions.textContent = '请填写 API URL';
+                return
+            }
+            try {
+                const models = await fetchModels(apiUrl, apiKey)
+                const sorted = Array.isArray(models) ? models.slice().sort((a, b) => String(a).toLowerCase().localeCompare(String(b).toLowerCase())) : []
+                populateCombobox(combobox, sorted)
+                actions.textContent = `已加载 ${sorted.length} 个模型`
+            } catch (err) {
+                console.error(err)
+                actions.textContent = '获取模型失败，可手动输入或重试'
+                alert('获取模型失败：' + (err.message || err))
+            }
+        })
+
+        providersContainer.appendChild(el)
+        return el
+    }
+
+    async function fetchModels(apiUrl, apiKey) {
+        // 尝试访问 /models 或 /v1/models 并返回字符串数组，若返回结构复杂做容错解析
+        const base = apiUrl.replace(/\/$/, '')
+        const tryUrls = [base + '/models', base + '/v1/models', base]
+        let lastErr = null
+        for (const u of tryUrls) {
+            try {
+                const headers = {}
+                if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
+                headers['Accept'] = 'application/json'
+                const resp = await fetch(u, {method: 'GET', headers})
+                if (!resp.ok) {
+                    lastErr = new Error(`请求 ${u} 返回 ${resp.status}`)
+                    continue
+                }
+                const data = await resp.json()
+                // 解析常见结构
+                // 如果是数组，尝试映射为 id/name
+                if (Array.isArray(data)) {
+                    return data.map(x => (x.id || x.name || String(x)).toString())
+                }
+                // 如果有 data 字段数组
+                if (Array.isArray(data.data)) {
+                    return data.data.map(x => (x.id || x.name || String(x)).toString())
+                }
+                // 如果有 models 字段数组
+                if (Array.isArray(data.models)) {
+                    return data.models.map(x => (x.id || x.name || String(x)).toString())
+                }
+                // 如果是对象键值为模型名
+                if (typeof data === 'object' && data !== null) {
+                    const keys = Object.keys(data)
+                    if (keys.length > 0) {
+                        // 过滤可能的元数据键
+                        const maybeModels = keys.filter(k => k.length > 2).slice(0, 200)
+                        if (maybeModels.length) return maybeModels
+                    }
+                }
+                // 无法解析则抛错
+                throw new Error('无法解析返回数据')
+            } catch (err) {
+                lastErr = err
+                // try next url
+            }
+        }
+        throw lastErr || new Error('获取模型失败')
+    }
+
+    function populateCombobox(comboEl, list) {
+        // list: 字符串数组
+        comboEl._items = Array.isArray(list) ? list : []
+        const ul = comboEl.querySelector('.combo-list')
+        ul.innerHTML = ''
+        for (const m of comboEl._items) {
+            const li = document.createElement('li')
+            li.className = 'combo-item'
+            li.setAttribute('role', 'option')
+            li.textContent = m
+            li.addEventListener('click', () => {
+                const input = comboEl.querySelector('.model-input')
+                input.value = m
+                hideList(comboEl)
+                input.focus()
+            })
+            ul.appendChild(li)
+        }
+        // 如果当前 input 有值且在列表中，将其标记
+        const cur = comboEl.querySelector('.model-input').value.trim()
+        if (cur) {
+            for (const li of ul.children) {
+                li.setAttribute('aria-selected', li.textContent === cur ? 'true' : 'false')
+            }
+        }
+        // 如果没有项则隐藏列表
+        if (ul.children.length === 0) ul.hidden = true
+    }
+
+    function setupCombobox(comboEl) {
+        const input = comboEl.querySelector('.model-input')
+        const toggle = comboEl.querySelector('.combo-toggle')
+        const ul = comboEl.querySelector('.combo-list')
+
+        comboEl._items = comboEl._items || []
+
+        function filterAndShow() {
+            const q = input.value.trim().toLowerCase()
+            let any = false
+            Array.from(ul.children).forEach(li => {
+                const ok = !q || li.textContent.toLowerCase().indexOf(q) !== -1
+                li.style.display = ok ? '' : 'none'
+                if (ok) any = true
+                li.setAttribute('aria-selected', 'false')
+            })
+            if (any) {
+                showList(comboEl)
+            } else {
+                hideList(comboEl)
+            }
+        }
+
+        input.addEventListener('input', () => {
+            filterAndShow()
+        })
+
+        input.addEventListener('keydown', (e) => {
+            const visible = Array.from(ul.children).filter(li => li.style.display !== 'none')
+            if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                if (visible.length) visible[0].focus()
+            } else if (e.key === 'Escape') {
+                hideList(comboEl)
+            } else if (e.key === 'Enter') {
+                // 当列表打开且有高亮项时，选择它；否则保留输入值（允许自由输入）
+                const focused = document.activeElement
+                if (focused && focused.classList && focused.classList.contains('combo-item')) {
+                    focused.click()
+                } else {
+                    hideList(comboEl)
+                }
+            }
+        })
+
+        // 让 li 可获得焦点并响应键盘
+        ul.addEventListener('keydown', (e) => {
+            const items = Array.from(ul.children).filter(li => li.style.display !== 'none')
+            const idx = items.indexOf(document.activeElement)
+            if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                const next = items[idx + 1] || items[0]
+                next && next.focus()
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault()
+                const prev = items[idx - 1] || items[items.length - 1]
+                prev && prev.focus()
+            } else if (e.key === 'Enter') {
+                e.preventDefault()
+                document.activeElement && document.activeElement.click()
+            } else if (e.key === 'Escape') {
+                hideList(comboEl)
+                input.focus()
+            }
+        })
+
+        // make li tabbable
+        const observer = new MutationObserver(() => {
+            Array.from(ul.children).forEach(li => {
+                li.tabIndex = 0
+            })
+        })
+        observer.observe(ul, {childList: true})
+
+        comboEl.addEventListener('click', () => {
+            if (ul.hidden || ul.style.display === 'none') {
+                // show all (reset filter)
+                Array.from(ul.children).forEach(li => li.style.display = '')
+                showList(comboEl)
+                input.focus()
+                // focus first visible
+                // const first = Array.from(ul.children).find(li=>li.style.display!=='none')
+                // first && first.focus()
+            } else {
+                hideList(comboEl)
+                input.blur()
+            }
+        })
+
+        // 点击列表项已在 populateCombobox 中绑定 click
+        // 失焦时隐藏（延迟以允许点击触发）
+        comboEl.addEventListener('focusout', (e) => {
+            setTimeout(() => {
+                if (!comboEl.contains(document.activeElement)) hideList(comboEl)
+            }, 150)
+        })
+    }
+
+    function showList(comboEl) {
+        const ul = comboEl.querySelector('.combo-list')
+        ul.hidden = false
+    }
+
+    function hideList(comboEl) {
+        const ul = comboEl.querySelector('.combo-list')
+        ul.hidden = true
+    }
+
+    // 添加初始一个 provider
+    createProviderCard()
+
+    addProviderBtn.addEventListener('click', () => createProviderCard())
+
+    startBtn.addEventListener('click', async () => {
+        const video_url = document.getElementById('video_url').value.trim()
+        const prompt = document.getElementById('prompt').value.trim()
+        if (!video_url) {
+            alert('请输入视频链接或上传 CSV');
+            return
+        }
+        if (!prompt) {
+            if (!confirm('未填写 prompt，是否继续？')) return
+        }
+
+        // 收集 providers
+        const providerEls = [...providersContainer.querySelectorAll('.provider')]
+        const providers = providerEls.map(el => {
+            const api_url = el.querySelector('.api-url').value.trim()
+            const api_key = el.querySelector('.api-key').value.trim()
+            // 改为从 model-input 读取，自由输入也支持
+            const model = el.querySelector('.model-input').value.trim()
+            return {api_url, api_key, model}
+        }).filter(p => p.api_url) // 至少需要 api_url 才提交
+
+        const payload = {video_url, prompt, providers}
+        resultEl.textContent = '正在提交...'
+        resultsTable.innerHTML = ''
+        try {
+            const res = await fetch('/api/test', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            })
+            const data = await res.json()
+            renderResults(data)
+        } catch (err) {
+            resultEl.textContent = '请求失败：' + (err.message || err)
+        }
+    })
+
+    // 渲染结果为表格：按照 video_url, image(缩略图), 然后动态 model 列
+    function renderResults(data) {
+        resultsTable.innerHTML = ''
+        if (!data) {
+            resultEl.textContent = '无数据';
+            return
+        }
+        if (data.status && data.status !== 'success') {
+            resultEl.textContent = '返回状态：' + data.status
+            return
+        }
+        const rows = data.result || data.data || []
+        if (!Array.isArray(rows) || rows.length === 0) {
+            resultEl.textContent = '无结果'
+            return
+        }
+        resultEl.textContent = `共 ${rows.length} 条`
+
+        // 收集所有 model_name（按出现顺序）
+        const modelNames = []
+        for (const r of rows) {
+            if (!Array.isArray(r.summary_list)) continue
+            for (const s of r.summary_list) {
+                const name = s.model_name || 'unknown'
+                if (!modelNames.includes(name)) modelNames.push(name)
+            }
+        }
+
+        // 构建表格（修改：thead 两行，第二行为各 model 子列）
+        const table = document.createElement('table')
+        table.className = 'results-table'
+        const thead = document.createElement('thead')
+
+        // 第一行：video URL (rowspan=2), Images (rowspan=2), Summary (colspan = model count)
+        const topRow = document.createElement('tr')
+        const thUrl = document.createElement('th')
+        thUrl.textContent = 'video URL'
+        thUrl.rowSpan = 2
+        topRow.appendChild(thUrl)
+
+        const thImgs = document.createElement('th')
+        thImgs.textContent = 'Images'
+        thImgs.rowSpan = 2
+        topRow.appendChild(thImgs)
+
+        const thSummary = document.createElement('th')
+        thSummary.textContent = 'Summary'
+        thSummary.colSpan = Math.max(1, modelNames.length)
+        topRow.appendChild(thSummary)
+
+        thead.appendChild(topRow)
+
+        // 第二行：每个 model 的子列（若没有 model 则放一个 '-' 占位）
+        const subRow = document.createElement('tr')
+        if (modelNames.length === 0) {
+            const thEmpty = document.createElement('th')
+            thEmpty.textContent = '-'
+            subRow.appendChild(thEmpty)
+        } else {
+            for (const m of modelNames) {
+                const th = document.createElement('th')
+                th.textContent = m
+                subRow.appendChild(th)
+            }
+        }
+        thead.appendChild(subRow)
+        table.appendChild(thead)
+
+        const tbody = document.createElement('tbody')
+        for (const r of rows) {
+            const tr = document.createElement('tr')
+            // video_url
+            const tdUrl = document.createElement('td')
+            const a = document.createElement('a')
+            a.href = r.video_url || ''
+            a.textContent = r.video_url || ''
+            a.target = '_blank'
+            tdUrl.appendChild(a)
+            tr.appendChild(tdUrl)
+
+            // images 缩略图
+            const tdImg = document.createElement('td')
+            tdImg.className = 'thumbs'
+            if (Array.isArray(r.image_list) && r.image_list.length) {
+                for (const d of r.image_list) {
+                    try {
+                        const img = document.createElement('img')
+                        img.src = d
+                        img.alt = 'thumb'
+                        tdImg.appendChild(img)
+                    } catch (e) { /* 忽略错误 */ }
+                }
+            } else {
+                tdImg.textContent = '-'
+            }
+            tr.appendChild(tdImg)
+
+            // 每个 model 列（按照 modelNames 顺序填充）
+            for (const m of modelNames) {
+                const td = document.createElement('td')
+                td.className = 'summary-cell'
+                let found = null
+                if (Array.isArray(r.summary_list)) {
+                    found = r.summary_list.find(s => (s.model_name || '') === m)
+                }
+                if (found) {
+                    const val = (found.summary && String(found.summary).trim()) ? found.summary : found.message
+                    td.textContent = val == null ? '' : val
+                } else {
+                    td.textContent = '-'
+                }
+                tr.appendChild(td)
+            }
+
+            tbody.appendChild(tr)
+        }
+        table.appendChild(tbody)
+        resultsTable.appendChild(table)
+    }
+
+    // 简单防注入
+    function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,47 @@
+/* 基础表格样式 */
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* 固定列宽，用 colgroup 控制比例 */
+}
+
+.result-table th,
+.result-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal; /* 允许换行 */
+}
+
+/* 列比例：summary 最宽，video_url 可换行 */
+.col-video { width: 20%; }    /* video_url 列允许换行，较窄 */
+.col-images { width: 15%; }
+.col-tokens { width: 10%; text-align: center; }
+.col-summary { width: 45%; }  /* summary 列最宽 */
+.col-msg { width: 10%; }
+
+/* 额外：确保很长的 URL 可以在字符处断行 */
+.col-video {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* summary 文本友好展示 */
+.col-summary {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* 可选：响应式调整（在窄屏上 summary 占比更高） */
+@media (max-width: 800px) {
+  .col-video { width: 25%; }
+  .col-images { width: 15%; display: none; } /* 可根据需要隐藏 */
+  .col-tokens { width: 10%; display: none; }
+  .col-summary { width: 60%; }
+  .col-msg { width: 0; display: none; }
+}
+
