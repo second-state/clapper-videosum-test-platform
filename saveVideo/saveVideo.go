@@ -94,7 +94,7 @@ func convertVideo(inputPath, outputPath string) error {
 			"-colorspace", "1", // BT.709 色彩空间
 			"-color_primaries", "1", // BT.709 色彩基准
 			"-color_trc", "1", // BT.709 色调响应曲线
-			"-an", // 音频直接复制
+			"-c:a", "copy",
 			"-y",
 			outputPath,
 		}
@@ -171,7 +171,7 @@ func convertVideo(inputPath, outputPath string) error {
 		"-colorspace", "1", // BT.709 色彩空间
 		"-color_primaries", "1", // BT.709 色彩基准
 		"-color_trc", "1", // BT.709 色调响应曲线
-		"-an", // 不处理音频
+		"-c:a", "copy",
 		"-y",
 		outputPath,
 	}

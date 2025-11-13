@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"path/filepath"
 	"videosum_test_platform/keyScore"
 	"videosum_test_platform/saveVideo"
+	"videosum_test_platform/speech"
 	"videosum_test_platform/summaryVideo"
 )
 
@@ -170,6 +172,21 @@ func processVideo(videoURL string, providers []Provider, prompt string) ([]*Vide
 		videoPath := filepath.Join(outputDir, file)
 		fmt.Printf("下载完成！文件夹名: %s 视频文件名: %s\n", outputDir, file)
 
+		var transcription string
+		if len(providers) > 0 {
+			apiURL := os.Getenv("WHISPER_API_URL")
+			apiKey := os.Getenv("WHISPER_API_KEY")
+			model := os.Getenv("WHISPER_API_MODEL")
+			transcription, err = speech.TranscribeVideoToText(videoPath, outputDir, apiURL, apiKey, model)
+			if err != nil {
+				fmt.Println("语音转写失败:", err)
+			} else {
+				fmt.Println("语音转写结果:", transcription)
+			}
+		} else {
+			fmt.Println("未提供 provider，跳过语音转写")
+		}
+
 		imageUrl, err := keyScore.ExtractKeyframes(videoPath, outputDir)
 		if err != nil {
 			fmt.Println("提取关键帧失败:", err)
@@ -189,7 +206,7 @@ func processVideo(videoURL string, providers []Provider, prompt string) ([]*Vide
 		var summaryList []SummaryItem
 		firstSuccessSummary := ""
 		for _, prov := range providers {
-			summarized, useModel, summarizedErr := summaryVideo.ProcessVideoFramesWithAI(outputDir, "", "", false, prov.APIUrl, prov.APIKey, prov.Model, prompt)
+			summarized, useModel, summarizedErr := summaryVideo.ProcessVideoFramesWithAI(outputDir, transcription, "", false, prov.APIUrl, prov.APIKey, prov.Model, prompt)
 
 			item := SummaryItem{
 				TokensUsed:      0, // 如果 summaryVideo 返回此类信息，可在此填充
